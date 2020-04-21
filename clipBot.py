@@ -26,34 +26,43 @@ def set_twitter_api(consumer_key, consumer_secret, access_key, access_secret):
     return twitter_api
 
 
-def get_top_streams(client):
-    streams_iterator = client.get_streams(page_size=7)
+def get_top_games(client):
+    streams_iterator = client.get_top_games(page_size=20)
     i=1
-    top={}
-    for stream in islice(streams_iterator, 0, 7):
-        userName = stream['user_name']
-        viewers = stream['viewer_count']
-        top[str(i)] = (str(i)+'. ' + userName + ' Viewers: ' + '{:,d}').format(viewers)
+    top_game={}
+    for game in islice(streams_iterator, 0, 20):
+        top_game[str(i)] = game['id']
         i+=1
-    return top
+    return top_game
 
+
+def get_top_clips(client, top_game):
+    top_clips={}
+    for i in top_game:
+        clips_iterator = client.get_clips(game_id=top_game[i], page_size=5)
+        clip_list = []
+        for clip in islice(clips_iterator, 0, 5):
+            clip_list.append(clip)
+        top_clips[i] = clip_list
+    return top_clips
+    
 
 def send_new_tweet(top, api):
-    tweet = '{}\n{}\n{}\n{}\n{}\n{}\n{}\n#twitchtv #TopStreams'.format(top['1'],top['2'],top['3'],top['4'],top['5'],top['6'],top['7'])
-    api.update_status(tweet)
-
+    print(top)
+    
 
 if __name__ == "__main__":
     api = set_twitter_api(*get_twitter_env())
     client_key, client_secret = get_twitch_env()
     client = TwitchHelix(client_id=client_key)
+    send_new_tweet(get_top_clips(client, get_top_games(client)), api)
     now = datetime.datetime.now()
-    while now.minute != 0:
-        now = datetime.datetime.now()
-        time.sleep(15)
+    #while now.minute != 0:
+        #now = datetime.datetime.now()
+        #time.sleep(15)
 
-    while True:
-        send_new_tweet(get_top_streams(client), api)
-        time.sleep(INTERVAL)
+    #while True:
+        #send_new_tweet(get_top_streams(client), api)
+        #time.sleep(INTERVAL)
 
 
