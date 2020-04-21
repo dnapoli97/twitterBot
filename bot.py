@@ -47,9 +47,9 @@ if __name__ == "__main__":
     client_key, client_secret = get_twitch_env()
     client = TwitchHelix(client_id=client_key)
     now = datetime.datetime.now()
-    #while now.minute != 0:
-     #   now = datetime.datetime.now()
-      #  time.sleep(15)
+    while now.minute != 0:
+        now = datetime.datetime.now()
+        time.sleep(15)
 
     while True:
         send_new_tweet(get_top_streams(client), api)
