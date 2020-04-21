@@ -1,22 +1,20 @@
 import tweepy, time, sys, os, dotenv, requests, datetime
-from dotenv import load_dotenv
 from twitch import TwitchHelix
 from itertools import islice
-load_dotenv()
 
 INTERVAL = 60*60
 
 def get_twitter_env():    
-    consumer_key = os.getenv('CONSUMER_KEY')
-    consumer_secret = os.getenv('CONSUMER_SECRET')
-    access_key = os.getenv('ACCESS_KEY')
-    access_secret = os.getenv('ACCESS_SECRET')
+    consumer_key = os.environ['CONSUMER_KEY']
+    consumer_secret = os.environ['CONSUMER_SECRET']
+    access_key = os.environ['ACCESS_KEY']
+    access_secret = os.environ['ACCESS_SECRET']
     return consumer_key, consumer_secret, access_key, access_secret
 
 
 def get_twitch_env():
-    client_key = os.getenv('CLIENT_ID')
-    client_secret = os.getenv('CLIENT_SECRET')
+    client_key = os.environ['CLIENT_ID']
+    client_secret = os.environ['CLIENT_SECRET']
     return client_key, client_secret
 
 
@@ -49,9 +47,9 @@ if __name__ == "__main__":
     client_key, client_secret = get_twitch_env()
     client = TwitchHelix(client_id=client_key)
     now = datetime.datetime.now()
-    while now.minute != 0:
-        now = datetime.datetime.now()
-        time.sleep(15)
+    #while now.minute != 0:
+     #   now = datetime.datetime.now()
+      #  time.sleep(15)
 
     while True:
         send_new_tweet(get_top_streams(client), api)
