@@ -77,7 +77,7 @@ def send_new_tweet(top, api):
     while i <= 10:
         a = 0
         while a < len(top[str(i)]):
-            api.update_status('{:s}: {:s} Views: {:,d}\n{}\n#TwitchTv #TopClips #{:s}'.format(top[str(i)][a]['broadcaster_name'], top[str(i)][a]['title'], top[str(i)][a]['view_count'], top[str(i)][a]['embed_url'] + '?tt_medium=twtr', top[str(i)][a]['broadcaster_name']))
+            api.update_status('{:s}: {:s} Views: {:,d}\n{}\n#TwitchTv #TopClips #{:s}'.format(top[str(i)][a]['broadcaster_name'], top[str(i)][a]['title'], top[str(i)][a]['view_count'], top[str(i)][a]['url'] + '?tt_medium=twtr', top[str(i)][a]['broadcaster_name']))
             a+=1
             time.sleep(CLIP_INTERVAL)
         i+=1    
