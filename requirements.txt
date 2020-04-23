@@ -2,3 +2,4 @@ tweepy
 python-dotenv
 requests
 python-twitch-client
+pathlib
