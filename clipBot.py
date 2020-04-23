@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from itertools import islice
 load_dotenv()
 CLIP_INTERVAL = 60*30
-jsonClipPath = pathlib.Path('tweetedClips.json').parent.absolute().as_posix() + '/twitterBot/tweetedClips.json'
+jsonClipPath = pathlib.Path('tweetedClips.json').parent.absolute().as_posix() + '/tweetedClips.json'
 
 
 def get_twitter_env():    
