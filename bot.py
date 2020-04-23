@@ -39,7 +39,7 @@ def get_top_streams(client):
 
 
 def send_new_tweet(top, api):
-    tweet = '{}\n{}\n{}\n{}\n{}\n{}\n{}\n#twitchtv #TopStreams'.format(top['1'],top['2'],top['3'],top['4'],top['5'],top['6'],top['7'])
+    tweet = '{}\n{}\n{}\n{}\n{}\n{}\n{}\n#TwitchTv #TopStreams'.format(top['1'],top['2'],top['3'],top['4'],top['5'],top['6'],top['7'])
     api.update_status(tweet)
 
 
@@ -49,8 +49,8 @@ if __name__ == "__main__":
     client = TwitchHelix(client_id=client_key)
     now = datetime.datetime.now()
     while now.minute != 0:
-        now = datetime.datetime.now()
         time.sleep(15)
+        now = datetime.datetime.now()
 
     while True:
         send_new_tweet(get_top_streams(client), api)
