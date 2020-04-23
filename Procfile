@@ -1,2 +1,2 @@
-worker: python bot.py
-worker: python clipBot.py
+worker1: python bot.py
+worker2: python clipBot.py
