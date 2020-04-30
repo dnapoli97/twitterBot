@@ -1,10 +1,13 @@
 import tweepy, time, sys, os, dotenv, requests, datetime, json, pathlib
+import driver
+from bs4 import BeautifulSoup
 from twitch import TwitchHelix
 from dotenv import load_dotenv
 from itertools import islice
 load_dotenv()
-CLIP_INTERVAL = 60*30
-jsonClipPath = pathlib.Path('tweetedClips.json').parent.absolute().as_posix() + '/tweetedClips.json'
+CLIP_INTERVAL = 215940
+path = 'C:/Users/dnapo/AppData/Local/Google/Chrome SxS/Application/chrome.exe'
+
 
 
 def get_twitter_env():    
@@ -29,71 +32,72 @@ def set_twitter_api(consumer_key, consumer_secret, access_key, access_secret):
 
 
 def get_top_games(client):
-    streams_iterator = client.get_top_games(page_size=10)
+    streams_iterator = client.get_top_games(page_size=30)
     i=1
     top_game={}
-    for game in islice(streams_iterator, 0, 10):
+    for game in islice(streams_iterator, 0, 30):
         top_game[str(i)] = game['id']
         i+=1
     return top_game
 
 
+
+
+
 def get_top_clips(client, top_game):
     top_clips={}
     today = datetime.datetime.now() - datetime.timedelta(days=30)
-    tweeted_clips = get_tweeted_clips(jsonClipPath)
-    added_clips = {}
-    for i in top_game:
+    spot = 1
+    while len(top_clips) < 7:
+        i = str(spot)
         clips_iterator = client.get_clips(game_id=top_game[i], page_size=100)
-        clip_list = []
         ind = 0
-        while len(clip_list) < 5 and ind < len(clips_iterator):
+        found = False
+        while ind < len(clips_iterator) and (not found):
             clip = clips_iterator[ind]
-            if(clip['created_at'] > today) and not clip['video_id'] in tweeted_clips:
-                clip_list.append(clip)
-                added_clips[clip['video_id']] = {'video_id': clip['video_id'], 'title': clip['title']}
+            if(clip['created_at'] > today):
+                top_clips[i] = clip
+                found = True
             ind+=1
-        top_clips[i] = clip_list
-    append_to_json(jsonClipPath, added_clips)
+        spot += 1
     return top_clips
 
 
-def append_to_json(filePath, appending_dict):
-    with open(filePath, "r+") as file:
-        data = json.load(file)
-        data.update(appending_dict)
-        file.seek(0)
-        json.dump(data, file)
-
-
-def get_tweeted_clips(filePath):
-    with open(filePath, "r+") as file:
-        data = json.load(file)
-        return data
-
-
 def send_new_tweet(top, api):
-    i = 1
-    while i <= 10:
-        a = 0
-        while a < len(top[str(i)]):
-            api.update_status('{:s}: {:s} Views: {:,d}\n{}\n#TwitchTv #TopClips #{:s}'.format(top[str(i)][a]['broadcaster_name'], top[str(i)][a]['title'], top[str(i)][a]['view_count'], top[str(i)][a]['url'] + '?tt_medium=twtr', top[str(i)][a]['broadcaster_name']))
-            a+=1
-            time.sleep(CLIP_INTERVAL)
-        i+=1    
+    for i in top:
+        vid_url = find_download_url(top_clips, i)
+        download_vid(vid_url)
+        media = api.media_upload("twitch_clip.mp4")
+        status = '{:s}: {:s} Views: {:,d}\n\n#TwitchTv #TopClips #{:s}'.format(top[i]['broadcaster_name'], top[i]['title'], top[i]['view_count'], top[str(i)]['broadcaster_name'])
+        api.update_status(status=status, media_ids=[media.media_id])
+        time.sleep(CLIP_INTERVAL)
+
+
+def find_download_url(top, i):
+    url = top[i]['url']
+    drive = driver.driver(path)
+    drive.get_page(url)
+    html = drive.get_source()
+    soup = BeautifulSoup(html, features="html.parser")
+    vid = soup.find_all('video')
+    vid_url = vid[0].attrs['src']
+    drive.close_driver()
+    return vid_url
+
+
+def download_vid(vid_url):
+    r = requests.get(vid_url)
+    with open("twitch_clip.mp4",'wb') as f: 
+        f.write(r.content) 
 
 
 if __name__ == "__main__":
     api = set_twitter_api(*get_twitter_env())
     client_key, client_secret = get_twitch_env()
     client = TwitchHelix(client_id=client_key)
-    top_clips = get_top_clips(client, get_top_games(client))
-    now = datetime.datetime.now()
-    while now.minute % 15 != 0:
-        time.sleep(15)
-        now = datetime.datetime.now()
-        
-    send_new_tweet(top_clips, api)
     
-
-
+    while True:
+        top_clips = get_top_clips(client, get_top_games(client))
+        send_new_tweet(top_clips, api)
+        
+    

@@ -3,3 +3,5 @@ python-dotenv
 requests
 python-twitch-client
 pathlib
+beautifulsoup4
+selenium
