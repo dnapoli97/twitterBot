@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from twitch import TwitchHelix
 from dotenv import load_dotenv
 from itertools import islice
+import VideoTweet
 load_dotenv()
 CLIP_INTERVAL = 215940
 path = 'C:/Users/dnapo/AppData/Local/Google/Chrome SxS/Application/chrome.exe'
@@ -67,9 +68,12 @@ def send_new_tweet(top, api):
     for i in top:
         vid_url = find_download_url(top_clips, i)
         download_vid(vid_url)
-        media = api.media_upload("twitch_clip.mp4")
         status = '{:s}: {:s} Views: {:,d}\n\n#TwitchTv #TopClips #{:s}'.format(top[i]['broadcaster_name'], top[i]['title'], top[i]['view_count'], top[str(i)]['broadcaster_name'])
-        api.update_status(status=status, media_ids=[media.media_id])
+        vid_uploader =VideoTweet.VideoTweet('twitch_clip.mp4', status)
+        vid_uploader.upload_init()
+        vid_uploader.upload_append()
+        vid_uploader.upload_finalize()
+        vid_uploader.tweet()
         time.sleep(CLIP_INTERVAL)
 
 
@@ -95,7 +99,11 @@ if __name__ == "__main__":
     api = set_twitter_api(*get_twitter_env())
     client_key, client_secret = get_twitch_env()
     client = TwitchHelix(client_id=client_key)
-    
+    now = datetime.datetime.now()
+    while not (now.hour == 12):
+        time.sleep(30)
+        now = datetime.datetime.now()
+
     while True:
         top_clips = get_top_clips(client, get_top_games(client))
         send_new_tweet(top_clips, api)
