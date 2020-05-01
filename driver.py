@@ -10,8 +10,9 @@ class driver:
     def __init__(self, path):
         chrome_options = Options()  
         chrome_options.add_argument("headless") 
-    
-        self.driver = webdriver.Chrome(options=chrome_options)   
+        chrome_options.binary_location = "/app/.apt/usr/bin/google-chrome"
+
+        self.driver = webdriver.Chrome(options=chrome_options, )   
  
 
     def get_page(self, url):
