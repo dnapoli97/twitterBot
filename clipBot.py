@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from itertools import islice
 import VideoTweet
 load_dotenv()
-CLIP_INTERVAL = 215940
+CLIP_INTERVAL = 79160
 path = 'C:/Users/dnapo/AppData/Local/Google/Chrome SxS/Application/chrome.exe'
 
 
@@ -49,22 +49,23 @@ def get_top_clips(client, top_game):
     top_clips={}
     today = datetime.datetime.now() - datetime.timedelta(days=30)
     spot = 1
-    while len(top_clips) < 7:
+    while len(top_clips) < 21:
         i = str(spot)
         clips_iterator = client.get_clips(game_id=top_game[i], page_size=100)
         ind = 0
-        found = False
-        while ind < len(clips_iterator) and (not found):
+        found = 0
+        while ind < len(clips_iterator) and (not found == 3):
             clip = clips_iterator[ind]
             if(clip['created_at'] > today):
                 top_clips[i] = clip
-                found = True
+                found += 1
             ind+=1
         spot += 1
     return top_clips
 
 
 def send_new_tweet(top, api):
+    daily_count = 0
     for i in top:
         vid_url = find_download_url(top_clips, i)
         download_vid(vid_url)
@@ -74,7 +75,12 @@ def send_new_tweet(top, api):
         vid_uploader.upload_append()
         vid_uploader.upload_finalize()
         vid_uploader.tweet()
-        time.sleep(CLIP_INTERVAL)
+        daily_count+= 1
+        if daily_count == 3:
+            time.sleep(CLIP_INTERVAL)
+            daily_count = 0
+        else:
+            time.sleep(3560)
 
 
 def find_download_url(top, i):
@@ -100,7 +106,7 @@ if __name__ == "__main__":
     client_key, client_secret = get_twitch_env()
     client = TwitchHelix(client_id=client_key)
     now = datetime.datetime.now()
-    while not (now.hour == 12):
+    while not (now.hour == 22):
         time.sleep(30)
         now = datetime.datetime.now()
 
