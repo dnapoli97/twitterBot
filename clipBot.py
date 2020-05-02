@@ -55,12 +55,13 @@ def get_top_clips(client, top_game):
         ind = 0
         found = 0
         while ind < len(clips_iterator) and (not found == 3):
+            i = str(spot)
             clip = clips_iterator[ind]
             if(clip['created_at'] > today):
                 top_clips[i] = clip
                 found += 1
+                spot += 1
             ind+=1
-        spot += 1
     return top_clips
 
 
