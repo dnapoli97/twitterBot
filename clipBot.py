@@ -109,9 +109,9 @@ if __name__ == "__main__":
     client_key, client_secret = get_twitch_env()
     client = TwitchHelix(client_id=client_key)
     now = datetime.datetime.now()
-    #while not (now.hour == 22 and now.minute == 30):
-        #time.sleep(30)
-        #now = datetime.datetime.now()
+    while not (now.hour == 22 and now.minute == 30):
+        time.sleep(30)
+        now = datetime.datetime.now()
 
     while True:
         top_clips = get_top_clips(client, get_top_games(client))
