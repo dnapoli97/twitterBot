@@ -17,7 +17,7 @@ CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
 ACCESS_TOKEN = os.environ['ACCESS_KEY']
 ACCESS_TOKEN_SECRET = os.environ['ACCESS_SECRET']
 
-VIDEO_FILENAME = '../twitch_clip.mp4'
+VIDEO_FILENAME = 'twitch_clip.mp4'
 TWEET_STATUS = 'Tweet status here'
 
 oauth = OAuth1(CONSUMER_KEY,

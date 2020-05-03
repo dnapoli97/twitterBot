@@ -33,7 +33,7 @@ def set_twitter_api(consumer_key, consumer_secret, access_key, access_secret):
 
 
 def get_top_games(client):
-    streams_iterator = client.get_top_games(page_size=30)
+    streams_iterator = client.get_top_games(page_size=15)
     i=1
     top_game={}
     for game in islice(streams_iterator, 0, 30):
@@ -49,19 +49,21 @@ def get_top_clips(client, top_game):
     top_clips={}
     today = datetime.datetime.now() - datetime.timedelta(days=30)
     spot = 1
+    temp = 1
     while len(top_clips) < 21:
         i = str(spot)
         clips_iterator = client.get_clips(game_id=top_game[i], page_size=100)
         ind = 0
         found = 0
         while ind < len(clips_iterator) and (not found == 3):
-            i = str(spot)
+            a = str(temp)
             clip = clips_iterator[ind]
             if(clip['created_at'] > today):
-                top_clips[i] = clip
+                top_clips[a] = clip
                 found += 1
-                spot += 1
+                temp += 1
             ind+=1
+        spot += 1
     return top_clips
 
 
@@ -107,9 +109,9 @@ if __name__ == "__main__":
     client_key, client_secret = get_twitch_env()
     client = TwitchHelix(client_id=client_key)
     now = datetime.datetime.now()
-    while not (now.hour == 22):
-        time.sleep(30)
-        now = datetime.datetime.now()
+    #while not (now.hour == 22 and now.minute == 30):
+        #time.sleep(30)
+        #now = datetime.datetime.now()
 
     while True:
         top_clips = get_top_clips(client, get_top_games(client))
