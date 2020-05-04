@@ -1,4 +1,4 @@
-import tweepy, time, sys, os, dotenv, requests, datetime
+import tweepy, time, sys, os, dotenv, requests, datetime, json
 from twitch import TwitchHelix
 from dotenv import load_dotenv
 from itertools import islice
@@ -16,7 +16,12 @@ def get_twitter_env():
 def get_twitch_env():
     client_key = os.environ['CLIENT_ID']
     client_secret = os.environ['CLIENT_SECRET']
-    return client_key, client_secret
+    response = requests.post(url='https://id.twitch.tv/oauth2/token', params={'client_id': client_key, 'client_secret': client_secret, 'grant_type': 'client_credentials'}).content
+    response = json.loads(response)
+    access_token = response['access_token']
+    EXPIRE = response['expires_in']
+    client = TwitchHelix(client_id=client_key, oauth_token=access_token)
+    return client, EXPIRE
 
 
 def set_twitter_api(consumer_key, consumer_secret, access_key, access_secret):
@@ -45,14 +50,15 @@ def send_new_tweet(top, api):
 
 if __name__ == "__main__":
     api = set_twitter_api(*get_twitter_env())
-    client_key, client_secret = get_twitch_env()
-    client = TwitchHelix(client_id=client_key)
+    client, EXPIRE = get_twitch_env()
     now = datetime.datetime.now()
     while now.minute != 0:
         time.sleep(15)
         now = datetime.datetime.now()
 
     while True:
+        if not EXPIRE:
+            client, EXPIRE = get_twitch_env()
         send_new_tweet(get_top_streams(client), api)
         time.sleep(INTERVAL)
 
