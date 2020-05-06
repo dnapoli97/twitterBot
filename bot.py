@@ -44,7 +44,7 @@ def get_top_streams(client):
 
 
 def send_new_tweet(top, api):
-    tweet = '{}\n{}\n{}\n{}\n{}\n{}\n{}\n#TwitchTv #TopStreams'.format(top['1'],top['2'],top['3'],top['4'],top['5'],top['6'],top['7'])
+    tweet = '{}\n{}\n{}\n{}\n{}\n{}\n{}\n#TwitchTv #twitch #TopStreams'.format(top['1'],top['2'],top['3'],top['4'],top['5'],top['6'],top['7'])
     api.update_status(tweet)
 
 
@@ -57,9 +57,10 @@ if __name__ == "__main__":
         now = datetime.datetime.now()
 
     while True:
-        if not EXPIRE:
+        if EXPIRE < 3600:
             client, EXPIRE = get_twitch_env()
         send_new_tweet(get_top_streams(client), api)
         time.sleep(INTERVAL)
+        EXPIRE -= INTERVAL
 
 

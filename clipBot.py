@@ -4,14 +4,32 @@ from bs4 import BeautifulSoup
 from twitch import TwitchHelix
 from dotenv import load_dotenv
 from itertools import islice
+from requests import codes
 import VideoTweet
 load_dotenv()
 CLIP_INTERVAL = 79160
 path = 'C:/Users/dnapo/AppData/Local/Google/Chrome SxS/Application/chrome.exe'
+json_file_name = 'top_clips.json'
 
 
 
 class clipBot():
+    _rate_limit_resets = set()
+    _rate_limit_remaining = 0
+
+    def _wait_for_rate_limit_reset(self):
+        if self._rate_limit_remaining == 0:
+            current_time = int(time.time())
+            self._rate_limit_resets = set(x for x in self._rate_limit_resets if x > current_time)
+
+            if len(self._rate_limit_resets) > 0:
+                reset_time = list(self._rate_limit_resets)[0]
+
+                # Calculate wait time and add 0.1s to the wait time to allow Twitch to reset
+                # their counter
+                wait_time = reset_time - current_time + 0.1
+                time.sleep(wait_time)
+
 
     def __init__(self):
         self.api = self.set_twitter_api(*self.get_twitter_env())
@@ -45,7 +63,7 @@ class clipBot():
 
 
     def get_top_games(self, client):
-        streams_iterator = client.get_top_games(page_size=15)
+        streams_iterator = client.get_top_games(page_size=30)
         i=1
         top_game={}
         for game in islice(streams_iterator, 0, 30):
@@ -56,43 +74,54 @@ class clipBot():
 
     def get_top_clips(self, client, top_game):
         top_clips={}
-        today = datetime.datetime.now() - datetime.timedelta(days=30)
-        spot = 1
-        temp = 1
-        while len(top_clips) < 21:
-            i = str(spot)
-            clips_iterator = client.get_clips(game_id=top_game[i], page_size=100)
-            ind = 0
-            found = 0
-            while ind < len(clips_iterator) and (not found == 3):
-                a = str(temp)
-                clip = clips_iterator[ind]
-                if(clip['created_at'] > today):
-                    top_clips[a] = clip
-                    found += 1
-                    temp += 1
-                ind+=1
-            spot += 1
-        return top_clips
+        today = datetime.datetime.now(datetime.timezone.utc).astimezone() - datetime.timedelta(days=30)
+        for game in top_game:
+            clips_iterator = self.top_clips_api(top_game[game], 20, today.isoformat())
+            for element in clips_iterator:
+                top_clips[str(len(top_clips))] = element
+        return {k: v for k, v in sorted(top_clips.items(), key=lambda item: item[1]['view_count'], reverse=True)}
+
+
+    def top_clips_api(self, game_id, page_size, started_at):
+        self._wait_for_rate_limit_reset()
+        now = datetime.datetime.now(datetime.timezone.utc).astimezone()
+        response = requests.get(url='https://api.twitch.tv/helix/clips', headers={'Client-ID': self.client._client_id},params={'game_id':game_id, 'first': page_size, 'started_at': started_at, 'ended_at': now.isoformat() })
+        
+        remaining = response.headers.get('Ratelimit-Remaining')
+        if remaining:
+            self._rate_limit_remaining = int(remaining)
+
+        reset = response.headers.get('Ratelimit-Reset')
+        if reset:
+            self._rate_limit_resets.add(int(reset))
+
+        # If status code is 429, re-run _request_get which will wait for the appropriate time
+        # to obey the rate limit
+        if response.status_code == 429:
+            return self.top_clips_api(game_id, page_size, started_at)
+        
+        response = json.loads(response.content)
+        return response['data']
 
 
     def send_new_tweet(self, top, api):
-        daily_count = 0
+        
         for i in top:
+            now = datetime.datetime.now()
             vid_url = self.find_download_url(top, i)
             self.download_vid(vid_url)
-            status = '{:s}: {:s} Views: {:,d}\n\n#TwitchTv #TopClips #{:s}'.format(top[i]['broadcaster_name'], top[i]['title'], top[i]['view_count'], top[str(i)]['broadcaster_name'])
+            status = '{:s}: {:s} Views: {:,d}\n\n#TwitchTv #Twitch #TopClips #{:s}'.format(top[i]['broadcaster_name'], top[i]['title'], top[i]['view_count'], top[str(i)]['broadcaster_name'])
             vid_uploader =VideoTweet.VideoTweet('twitch_clip.mp4', status)
             vid_uploader.upload_init()
             vid_uploader.upload_append()
             vid_uploader.upload_finalize()
             vid_uploader.tweet()
-            daily_count+= 1
-            if daily_count == 3:
-                time.sleep(CLIP_INTERVAL)
-                daily_count = 0
-            else:
-                time.sleep(3560)
+            del top[i]
+            self.output_to_json(top)
+            time.sleep(3560)
+            then = datetime.datetime.now() - now
+            elapsed = then.total_seconds()
+            self.EXPIRE -= elapsed
 
 
     def find_download_url(self, top, i):
@@ -107,6 +136,33 @@ class clipBot():
         return vid_url
 
 
+    def output_to_json(self, top_clips):
+        position = 1
+        output = {}
+        for i in top_clips:
+            output[str(position)] = top_clips[i]
+            position += 1
+            if position > 168:
+                with open(json_file_name, 'w+') as jsonFlie:
+                    jsonFlie.write(json.dumps(output, indent=4))
+                return
+
+
+    def read_from_json(self):
+        try:
+            with open(json_file_name, 'r+') as top_clips_file:
+                top_clips = json.load(top_clips_file)
+                if len(top_clips) == 0:
+                    self.output_to_json(self.get_top_clips(self.client, self.get_top_games(self.client)))
+                    return self.read_from_json()
+                else:
+                    return top_clips
+        except FileNotFoundError:
+            with open(json_file_name, 'w+') as file:
+                file.write(json.dumps({}, indent=4))
+            return self.read_from_json()
+
+
     def download_vid(self, vid_url):
         r = requests.get(vid_url)
         with open("twitch_clip.mp4",'wb') as f: 
@@ -115,18 +171,18 @@ class clipBot():
 
     def run(self):
         now = datetime.datetime.now()
-        while not (now.hour == 22 and now.minute == 30):
+        while not (now.minute == 30):
             time.sleep(30)
             now = datetime.datetime.now()
 
         while True:
-            if not self.EXPIRE:
+            if self.EXPIRE < 3600:
                 self.client, self.EXPIRE = self.get_twitch_env()
-            top_clips = self.get_top_clips(self.client, self.get_top_games(self.client))
+            top_clips = self.read_from_json()
+            self.output_to_json(top_clips)
             self.send_new_tweet(top_clips, self.api)
         
     
 if __name__ == "__main__":
     main = clipBot()
     main.run()
-
