@@ -105,7 +105,7 @@ class clipBot():
 
 
     def send_new_tweet(self, top, api):
-        
+        editable_dict = top.copy()
         for i in top:
             if self.EXPIRE < 3600:
                 self.client, self.EXPIRE = self.get_twitch_env()
@@ -118,8 +118,8 @@ class clipBot():
             vid_uploader.upload_append()
             vid_uploader.upload_finalize()
             vid_uploader.tweet()
-            del top[i]
-            self.output_to_json(top)
+            del editable_dict[i]
+            self.output_to_json(editable_dict)
             time.sleep(1770)
             then = datetime.datetime.now() - now
             elapsed = then.total_seconds()
