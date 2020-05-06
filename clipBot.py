@@ -171,7 +171,7 @@ class clipBot():
 
     def run(self):
         now = datetime.datetime.now()
-        while not (now.minute == 30):
+        while not (now.minute == 15 or now.minute == 45):
             time.sleep(30)
             now = datetime.datetime.now()
 
