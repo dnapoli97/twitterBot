@@ -147,6 +147,7 @@ class clipBot():
             if position > 336:
                 with open(json_file_name, 'w+') as jsonFlie:
                     jsonFlie.write(json.dumps(output, indent=4))
+                    jsonFlie.close()
                 return
 
 
