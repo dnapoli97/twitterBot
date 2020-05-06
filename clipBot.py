@@ -107,6 +107,8 @@ class clipBot():
     def send_new_tweet(self, top, api):
         
         for i in top:
+            if self.EXPIRE < 3600:
+                self.client, self.EXPIRE = self.get_twitch_env()
             now = datetime.datetime.now()
             vid_url = self.find_download_url(top, i)
             self.download_vid(vid_url)
@@ -118,7 +120,7 @@ class clipBot():
             vid_uploader.tweet()
             del top[i]
             self.output_to_json(top)
-            time.sleep(3560)
+            time.sleep(1770)
             then = datetime.datetime.now() - now
             elapsed = then.total_seconds()
             self.EXPIRE -= elapsed
@@ -142,7 +144,7 @@ class clipBot():
         for i in top_clips:
             output[str(position)] = top_clips[i]
             position += 1
-            if position > 168:
+            if position > 336:
                 with open(json_file_name, 'w+') as jsonFlie:
                     jsonFlie.write(json.dumps(output, indent=4))
                 return
