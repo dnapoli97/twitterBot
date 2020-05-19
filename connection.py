@@ -51,6 +51,9 @@ class database_connection:
                     self.cursor.execute('select {} from {} where {}'.format(', '.join(columns), table, ', '.join(conditions)))
                 return self.cursor.fetchall()
             except mysql.connector.Error as e:
+                if e.errno == 2055:
+                    self.create_connection()
+                    return self.select(table, args, kwargs)
                 raise e
 
 
@@ -62,6 +65,9 @@ class database_connection:
                 self.cursor.execute('select * from {} where views=(select MAX({}) from {})'.format(table, column, table))
                 return self.cursor.fetchall()
             except mysql.connector.Error as e:
+                if e.errno == 2055:
+                    self.create_connection()
+                    return self.select_max(table, column)
                 raise e
 
 

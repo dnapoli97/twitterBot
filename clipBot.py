@@ -87,6 +87,7 @@ class clipBot:
         temp = {k: v for k, v in sorted(top_clips.items(), key=lambda item: item[1]['view_count'], reverse=True)}
         count = 0
         top_clips = {}
+        self.db_connect.prune_db()
         posted = self.db_connect.select('posted', columns=('url'))
         for clip in temp:
             if count < 48 and not (temp[clip]['url'],) in posted:
