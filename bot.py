@@ -63,9 +63,9 @@ if __name__ == "__main__":
         now = datetime.datetime.now()
         send_new_tweet(get_top_streams(client), api)
         duration = datetime.datetime.now() - now
-        time.sleep(INTERVAL - duration)
+        time.sleep(INTERVAL - duration.total_seconds())
         duration = clip_bot.run()
-        time.sleep(INTERVAL - duration)
+        time.sleep(INTERVAL - duration.total_seconds()) # type error
         EXPIRE -= INTERVAL*2
 
 
