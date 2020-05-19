@@ -5,3 +5,4 @@ python-twitch-client
 pathlib
 beautifulsoup4
 selenium
+mysql-connector-python

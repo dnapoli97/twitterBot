@@ -1,9 +1,9 @@
-import tweepy, time, sys, os, dotenv, requests, datetime, json
+import tweepy, time, sys, os, dotenv, requests, datetime, json, clipBot
 from twitch import TwitchHelix
 from dotenv import load_dotenv
 from itertools import islice
 load_dotenv()
-INTERVAL = 60*60
+INTERVAL = 60*30
 
 def get_twitter_env():    
     consumer_key = os.environ['CONSUMER_KEY']
@@ -44,13 +44,14 @@ def get_top_streams(client):
 
 
 def send_new_tweet(top, api):
-    tweet = '{}\n{}\n{}\n{}\n{}\n{}\n{}\n#TwitchTv #twitch #TopStreams'.format(top['1'],top['2'],top['3'],top['4'],top['5'],top['6'],top['7'])
+    tweet = '{}\n{}\n{}\n{}\n{}\n{}\n{}\n#TwitchTv #Twitch #TopStreams'.format(top['1'],top['2'],top['3'],top['4'],top['5'],top['6'],top['7'])
     api.update_status(tweet)
 
 
 if __name__ == "__main__":
     api = set_twitter_api(*get_twitter_env())
     client, EXPIRE = get_twitch_env()
+    clip_bot = clipBot.clipBot()
     now = datetime.datetime.now()
     while now.minute != 0:
         time.sleep(15)
@@ -59,8 +60,12 @@ if __name__ == "__main__":
     while True:
         if EXPIRE < 3600:
             client, EXPIRE = get_twitch_env()
+        now = datetime.datetime.now()
         send_new_tweet(get_top_streams(client), api)
-        time.sleep(INTERVAL)
-        EXPIRE -= INTERVAL
+        duration = datetime.datetime.now() - now
+        time.sleep(INTERVAL - duration)
+        duration = clip_bot.run()
+        time.sleep(INTERVAL - duration)
+        EXPIRE -= INTERVAL*2
 
 
