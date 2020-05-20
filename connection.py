@@ -51,7 +51,7 @@ class database_connection:
                     self.cursor.execute('select {} from {} where {}'.format(', '.join(columns), table, ', '.join(conditions)))
                 return self.cursor.fetchall()
             except mysql.connector.Error as e:
-                if e.errno == 2055:
+                if e.errno == 2055 or e.errno == 2006:
                     self.create_connection()
                     return self.select(table, args, kwargs)
                 raise e
@@ -65,7 +65,7 @@ class database_connection:
                 self.cursor.execute('select * from {} where views=(select MAX({}) from {})'.format(table, column, table))
                 return self.cursor.fetchall()
             except mysql.connector.Error as e:
-                if e.errno == 2055:
+                if e.errno == 2055 or e.errno == 2006:
                     self.create_connection()
                     return self.select_max(table, column)
                 raise e
@@ -84,7 +84,7 @@ class database_connection:
                 self.cursor.execute(stmt)
                 self.connection.commit()
             except mysql.connector.Error as e:
-                if e.errno == 2055:
+                if e.errno == 2055 or e.errno == 2006:
                     self.create_connection()
                     try:
                         self.cursor.execute(stmt)
@@ -100,7 +100,7 @@ class database_connection:
             self.cursor.execute(stmt)
             self.connection.commit()
         except mysql.connector.Error as e:
-            if e.errno == 2055:
+            if e.errno == 2055 or e.errno == 2006:
                 self.create_connection()
                 self.delete(table, condition)
             else:
@@ -113,7 +113,7 @@ class database_connection:
             self.cursor.execute(stmt)
             self.connection.commit()
         except mysql.connector.Error as e:
-            if e.errno == 2055:
+            if e.errno == 2055 or e.errno == 2006:
                 self.create_connection()
                 self.prune_db()
             else:
