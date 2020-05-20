@@ -13,7 +13,7 @@ class driver:
     def __init__(self, path):
         chrome_options = Options()  
         chrome_options.add_argument("headless") 
-        #chrome_options.binary_location = "/app/.apt/usr/bin/google-chrome"
+        chrome_options.binary_location = "/app/.apt/usr/bin/google-chrome"
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)   
  
 
