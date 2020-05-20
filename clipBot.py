@@ -1,4 +1,4 @@
-import tweepy, time, sys, os, dotenv, requests, datetime, pathlib, connection, json
+import tweepy, time, sys, os, dotenv, requests, datetime, pathlib, connection, json, string
 import driver
 from bs4 import BeautifulSoup
 from twitch import TwitchHelix
@@ -74,7 +74,9 @@ class clipBot:
 
     def get_game_name(self, id):
         game = self.client.get_games(game_ids=[id])
-        return game[0]['name'].replace(" ", "")
+        game = game[0]['name']
+        game.translate(str.maketrans('', '', string.punctuation))
+        return game
 
 
     def get_top_clips(self, top_game):
@@ -121,7 +123,7 @@ class clipBot:
     def send_new_tweet(self, url, broadcaster_name, video_id, game_id, title, views, created_at):
         vid_url = self.find_download_url(url)
         self.download_vid(vid_url)
-        status = '{:s}: {:s} Views: {:,d}\n\n#TwitchTv #Twitch #{:s} #{:s}'.format(broadcaster_name, title, views, self.get_game_name(game_id), broadcaster_name)
+        status = '{:s}: {:s} Views: {:,d}\n\n#streamer #gaming #{:s} #{:s}'.format(broadcaster_name, title, views, self.get_game_name(game_id), broadcaster_name)
         vid_uploader = VideoTweet.VideoTweet('twitch_clip.mp4', status)
         vid_uploader.upload_init()
         vid_uploader.upload_append()
