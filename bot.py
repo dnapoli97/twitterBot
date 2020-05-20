@@ -53,19 +53,19 @@ if __name__ == "__main__":
     client, EXPIRE = get_twitch_env()
     clip_bot = clipBot.clipBot()
     now = datetime.datetime.now()
-    while now.minute != 0:
-        time.sleep(15)
-        now = datetime.datetime.now()
+    #while now.minute != 0:
+        #time.sleep(15)
+        #now = datetime.datetime.now()
 
     while True:
         if EXPIRE < 3600:
             client, EXPIRE = get_twitch_env()
         now = datetime.datetime.now()
-        send_new_tweet(get_top_streams(client), api)
+        #send_new_tweet(get_top_streams(client), api)
         duration = datetime.datetime.now() - now
-        time.sleep(INTERVAL - duration.total_seconds())
+        #time.sleep(INTERVAL - duration.total_seconds())
         duration = clip_bot.run()
-        time.sleep(INTERVAL - duration.total_seconds()) # type error
+        #time.sleep(INTERVAL - duration.total_seconds())
         EXPIRE -= INTERVAL*2
 
 
