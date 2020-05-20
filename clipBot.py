@@ -125,7 +125,9 @@ class clipBot:
         vid_uploader = VideoTweet.VideoTweet('twitch_clip.mp4', status)
         vid_uploader.upload_init()
         vid_uploader.upload_append()
-        vid_uploader.upload_finalize()
+        if vid_uploader.upload_finalize() == False:
+            self.db_connect.delete('queued', "url='{}'".format(url))
+            return False
         vid_uploader.tweet()
         self.db_connect.delete('queued', "url='{}'".format(url))
         self.db_connect.insert('posted', columns=('url', 'broadcaster_name', 'video_id', 'game_id', 'title', 'views', 'created_at'), values=(url, broadcaster_name, video_id, game_id, title, views, created_at))
@@ -164,7 +166,9 @@ class clipBot:
                 self.db_connect.insert('queued', columns=('url', 'broadcaster_name', 'video_id', 'game_id', 'title', 'views', 'created_at'), values=(top_clips[clip]['url'], top_clips[clip]['broadcaster_name'], top_clips[clip]['video_id'], top_clips[clip]['game_id'], top_clips[clip]['title'], top_clips[clip]['view_count'], top_clips[clip]['created_at']))
         top_clips = self.db_connect.select_max('queued', 'views')
         url, broadcaster_name, video_id, game_id, title, views, created_at = top_clips[0]
-        self.send_new_tweet(url, broadcaster_name, video_id, game_id, title, views, created_at)
+        if self.send_new_tweet(url, broadcaster_name, video_id, game_id, title, views, created_at) == False:
+            self.run()
+            return datetime.datetime.now() - now
         self.EXPIRE-= 3600
         self.db_connect.close()
         return datetime.datetime.now() - now

@@ -112,7 +112,7 @@ class VideoTweet(object):
     print(req.json())
 
     self.processing_info = req.json().get('processing_info', None)
-    self.check_status()
+    return self.check_status()
 
 
   def check_status(self):
@@ -130,7 +130,7 @@ class VideoTweet(object):
       return
 
     if state == u'failed':
-      sys.exit(0)
+      return False
 
     check_after_secs = self.processing_info['check_after_secs']
     
@@ -147,7 +147,7 @@ class VideoTweet(object):
     req = requests.get(url=MEDIA_ENDPOINT_URL, params=request_params, auth=oauth)
     
     self.processing_info = req.json().get('processing_info', None)
-    self.check_status()
+    return self.check_status()
 
 
   def tweet(self):
