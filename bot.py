@@ -3,7 +3,7 @@ from twitch import TwitchHelix
 from dotenv import load_dotenv
 from itertools import islice
 load_dotenv()
-INTERVAL = 60*30
+INTERVAL = 60*60
 
 def get_twitter_env():    
     consumer_key = os.environ['CONSUMER_KEY']
