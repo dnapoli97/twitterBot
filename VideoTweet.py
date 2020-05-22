@@ -168,5 +168,6 @@ if __name__ == '__main__':
   videoTweet.upload_init()
   videoTweet.upload_append()
   videoTweet.upload_finalize()
+  videoTweet.add_metadata()
   videoTweet.tweet()
   

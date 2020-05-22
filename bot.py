@@ -61,11 +61,13 @@ if __name__ == "__main__":
         if EXPIRE < 3600:
             client, EXPIRE = get_twitch_env()
         now = datetime.datetime.now()
-        send_new_tweet(get_top_streams(client), api)
-        duration = datetime.datetime.now() - now
-        time.sleep(INTERVAL - duration.total_seconds())
-        duration = clip_bot.run()
-        time.sleep(INTERVAL - duration.total_seconds())
-        EXPIRE -= INTERVAL*2
+        if not now.hour == 3 or not now.hour == 4 or not now.hour == 5 or not now.hour == 6 or not now.hour == 7:
+            send_new_tweet(get_top_streams(client), api)
+            duration = datetime.datetime.now() - now
+            time.sleep(INTERVAL - duration.total_seconds())
+        else:
+            duration = clip_bot.run()
+            time.sleep(INTERVAL - duration.total_seconds())
+        EXPIRE -= INTERVAL
 
 

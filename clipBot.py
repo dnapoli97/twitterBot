@@ -83,7 +83,7 @@ class clipBot:
         top_clips={}
         today = datetime.datetime.now(datetime.timezone.utc).astimezone() - datetime.timedelta(days=30)
         for game in top_game:
-            clips_iterator = self.top_clips_api(top_game[game], 20, today.isoformat())
+            clips_iterator = self.top_clips_api(top_game[game], 10, today.isoformat())
             for element in clips_iterator:
                 top_clips[str(len(top_clips))] = element
         temp = {k: v for k, v in sorted(top_clips.items(), key=lambda item: item[1]['view_count'], reverse=True)}
@@ -92,7 +92,7 @@ class clipBot:
         self.db_connect.prune_db()
         posted = self.db_connect.select('posted', columns=('url'))
         for clip in temp:
-            if count < 24 and not (temp[clip]['url'],) in posted:
+            if count < 5 and not (temp[clip]['url'],) in posted:
                 top_clips[clip] = temp[clip]
                 count +=1
         return top_clips
@@ -129,6 +129,7 @@ class clipBot:
         vid_uploader.upload_append()
         if vid_uploader.upload_finalize() == False:
             self.db_connect.delete('queued', "url='{}'".format(url))
+            self.db_connect.insert('posted', columns=('url', 'broadcaster_name', 'video_id', 'game_id', 'title', 'views', 'created_at'), values=(url, broadcaster_name, video_id, game_id, title, views, created_at))
             return False
         vid_uploader.tweet()
         self.db_connect.delete('queued', "url='{}'".format(url))
@@ -175,7 +176,4 @@ class clipBot:
         self.db_connect.close()
         return datetime.datetime.now() - now
         
-    
-if __name__ == "__main__":
-    main = clipBot()
-    main.run()
+
