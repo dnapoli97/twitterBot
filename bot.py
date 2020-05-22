@@ -61,7 +61,7 @@ if __name__ == "__main__":
         if EXPIRE < 3600:
             client, EXPIRE = get_twitch_env()
         now = datetime.datetime.now()
-        if not now.hour == 23 or not now.hour == 24 or not now.hour == 1 or not now.hour == 2 or not now.hour == 3:
+        if not now.hour == 23 and not now.hour == 24 and not now.hour == 1 and not now.hour == 2 and not now.hour == 3:
             send_new_tweet(get_top_streams(client), api)
             duration = datetime.datetime.now() - now
             time.sleep(INTERVAL - duration.total_seconds())
