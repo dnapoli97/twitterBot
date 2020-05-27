@@ -74,8 +74,9 @@ class clipBot:
 
     def get_game_name(self, id):
         game = self.client.get_games(game_ids=[id])
-        game = game[0]['name'].replace(" ", "")
-        game.translate(str.maketrans('', '', string.punctuation))
+        game = game[0]['name'].replace("&", "And")
+        for i in ['-',':', ' ']:
+            game.replace(i,'')
         return game
 
 
@@ -167,6 +168,7 @@ class clipBot:
             top_clips = self.get_top_clips(self.get_top_games())
             for clip in top_clips:
                 self.db_connect.insert('queued', columns=('url', 'broadcaster_name', 'video_id', 'game_id', 'title', 'views', 'created_at'), values=(top_clips[clip]['url'], top_clips[clip]['broadcaster_name'], top_clips[clip]['video_id'], top_clips[clip]['game_id'], top_clips[clip]['title'], top_clips[clip]['view_count'], top_clips[clip]['created_at']))
+            self.db_connect.prune_db()
         top_clips = self.db_connect.select_max('queued', 'views')
         url, broadcaster_name, video_id, game_id, title, views, created_at = top_clips[0]
         if self.send_new_tweet(url, broadcaster_name, video_id, game_id, title, views, created_at) == False:
