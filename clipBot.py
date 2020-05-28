@@ -76,7 +76,7 @@ class clipBot:
         game = self.client.get_games(game_ids=[id])
         game = game[0]['name'].replace("&", "And")
         for i in ['-',':', ' ']:
-            game.replace(i,'')
+            game = game.replace(i,'')
         return game
 
 
