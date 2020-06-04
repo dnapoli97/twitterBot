@@ -109,7 +109,7 @@ class database_connection:
 
     def prune_db(self):
         try:
-            stmt = "DELETE FROM posted WHERE created_at < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY));"
+            stmt = "DELETE FROM posted WHERE created_at < NOW() - INTERVAL 30 DAY;"
             self.cursor.execute(stmt)
             self.connection.commit()
         except mysql.connector.Error as e:
@@ -118,3 +118,10 @@ class database_connection:
                 self.prune_db()
             else:
                 print('failed prune because {}'.format(e))
+
+
+if __name__ == "__main__":
+    connect = database_connection()
+    connect.prune_db()
+    connect.close
+
