@@ -117,6 +117,7 @@ class clipBot:
         if response.status_code == 429:
             return self.top_clips_api(game_id, page_size, started_at)
         
+        print(response.status_code)
         response = json.loads(response.content)
         return response['data']
 
@@ -172,8 +173,8 @@ class clipBot:
         top_clips = self.db_connect.select_max('queued', 'views')
         url, broadcaster_name, video_id, game_id, title, views, created_at = top_clips[0]
         if self.send_new_tweet(url, broadcaster_name, video_id, game_id, title, views, created_at) == False:
-            self.run()
-            return datetime.datetime.now() - now
+            runtime = self.run()
+            return (datetime.datetime.now() - now) + runtime
         self.EXPIRE-= 3600
         self.db_connect.close()
         return datetime.datetime.now() - now
