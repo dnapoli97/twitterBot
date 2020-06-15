@@ -44,7 +44,7 @@ def get_top_streams(client):
 
 
 def send_new_tweet(top, api):
-    tweet = '{}\n{}\n{}\n{}\n{}\n{}\n{}\n#TwitchTv #Twitch #TopStreams'.format(top['1'],top['2'],top['3'],top['4'],top['5'],top['6'],top['7'])
+    tweet = '{}\n{}\n{}\n{}\n{}\n{}\n{}\n#Twitch #Twitchtv #TwitchStreamer'.format(top['1'],top['2'],top['3'],top['4'],top['5'],top['6'],top['7'])
     api.update_status(tweet)
 
 

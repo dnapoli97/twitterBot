@@ -124,7 +124,7 @@ class clipBot:
     def send_new_tweet(self, url, broadcaster_name, video_id, game_id, title, views, created_at):
         vid_url = self.find_download_url(url)
         self.download_vid(vid_url)
-        status = '{:s}: {:s} Views: {:,d}\n\n#Twitch #Streamer #Gaming #{:s} #{:s}'.format(broadcaster_name, title, views, self.get_game_name(game_id), broadcaster_name)
+        status = '{:s}: {:s} Views: {:,d}\n\n#Twitch #Twitchtv #Clips #TwitchStreamer #Gaming #{:s} #{:s}'.format(broadcaster_name, title, views, self.get_game_name(game_id), broadcaster_name)
         vid_uploader = VideoTweet.VideoTweet('twitch_clip.mp4', status)
         vid_uploader.upload_init()
         vid_uploader.upload_append()
