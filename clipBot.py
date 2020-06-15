@@ -117,7 +117,10 @@ class clipBot:
         if response.status_code == 429:
             return self.top_clips_api(game_id, page_size, started_at)
         
-        print(response.status_code)
+        if response.status_code == 500:
+            print(response.status_code)
+            return []
+
         response = json.loads(response.content)
         return response['data']
 
