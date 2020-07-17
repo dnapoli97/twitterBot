@@ -53,10 +53,11 @@ if __name__ == "__main__":
     client, EXPIRE = get_twitch_env()
     clip_bot = clipBot.clipBot()
     now = datetime.datetime.now()
+
     while now.minute != 0:
         time.sleep(15)
         now = datetime.datetime.now()
-
+    
     while True:
         if EXPIRE < 3600:
             client, EXPIRE = get_twitch_env()
@@ -69,5 +70,4 @@ if __name__ == "__main__":
             duration = clip_bot.run()
             time.sleep(INTERVAL - duration.total_seconds())
         EXPIRE -= INTERVAL
-
 

@@ -127,6 +127,10 @@ class clipBot:
 
     def send_new_tweet(self, url, broadcaster_name, video_id, game_id, title, views, created_at):
         vid_url = self.find_download_url(url)
+        if not vid_url:
+            self.db_connect.delete('queued', "url='{}'".format(url))
+            self.db_connect.insert('posted', columns=('url', 'broadcaster_name', 'video_id', 'game_id', 'title', 'views', 'created_at'), values=(url, broadcaster_name, video_id, game_id, title, views, created_at))
+            return False
         self.download_vid(vid_url)
         status = '{:s}: {:s} Views: {:,d}\n\n#Twitch #Twitchtv #Clips #TwitchStreamer #Gaming #{:s} #{:s}'.format(broadcaster_name, title, views, self.get_game_name(game_id), broadcaster_name)
         vid_uploader = VideoTweet.VideoTweet('twitch_clip.mp4', status)
@@ -147,9 +151,12 @@ class clipBot:
         html = drive.get_source()
         soup = BeautifulSoup(html, features="html.parser")
         vid = soup.find_all('video')
-        vid_url = vid[0].attrs['src']
-        drive.close_driver()
-        return vid_url
+        try:
+            vid_url = vid[0].attrs['src']
+            drive.close_driver()
+            return vid_url
+        except IndexError:
+            return False
 
 
     def download_vid(self, vid_url):

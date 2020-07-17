@@ -18,8 +18,9 @@ class driver:
  
 
     def get_page(self, url):
+        self.driver.implicitly_wait(15)
         self.driver.get(url)
-        self.driver.implicitly_wait(30)
+        
 
 
     def get_source(self):
